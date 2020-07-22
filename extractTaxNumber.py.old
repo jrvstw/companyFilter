@@ -1,0 +1,22 @@
+from bs4 import BeautifulSoup
+import requests
+import codecs
+import os
+import fnmatch
+
+infile = 'webpage.html'
+outfile = "numbers.csv"
+fp = open(outfile, "w")
+
+
+html_content = codecs.open(infile, 'r', encoding="utf-8")
+page = BeautifulSoup(html_content, "lxml")
+table = page.find("section", attrs={"id":"listContainer"})
+for company in table.find_all("tr")[1:]:
+    number = company.find("a").string
+    print(number)
+    fp.write(number + '\n')
+
+
+fp.close()
+
