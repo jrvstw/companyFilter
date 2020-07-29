@@ -6,6 +6,8 @@ import fnmatch
 import json
 from bs4 import BeautifulSoup
 
+# 以下為向伺服器發送請求所需的資料
+# 這些資料有可能因伺服器內部更動而需要更新
 cookie = 'JSESSIONID=6y1sC6IltAB39vU73l3L704bBXW7FmDaBnz7zjpd.fbfhweb; TS014088ba=01ce097c29b7c424c2aa417979661e0552a52dca3fba61c7cc5c01af402452d4df26e76e6c783fba575af48dcda860f7e4dd51fddc45bba160e0c9c856888c8de0ccf70f4c; ASP.NET_SessionId=dmryamltuybubsuyse2porjb; TS017243ec=01ce097c290265730f6b687dbb2e6cafeae2424c814bc11b3dbc923d9bc3bc8d1cbd2c27867994d518d9a0821f32da7c02a9b7f4a7d8e4d87832de18e2f054d0744186d7cc; TS01f995a3=01ce097c29785ba83d608149215a9fa09e57937658e12625e16383ed4f11b9180d0bbcc177c7f8f75485522968c256ef161248d342'
 userAgent =  'Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36'
 
@@ -42,60 +44,76 @@ basic_headers = {
 grade_url = "https://fbfh.trade.gov.tw/fb/common/popGrade.action"
 grade_headers = basic_headers
 
-def validate(argv):
-    ieType = argv[1] if len(argv) > 1 else ""
-    while re.search('^[EI]$', ieType) == None:
-        ieType = input("I/E : ")
-    ccc = argv[2] if len(argv) > 2 else ""
-    while re.search('^[0-9]{4}$', ccc) == None:
-        ccc = input("ccc : ")
-    return (ieType, ccc)
-
+# 向伺服器送出「查詢某稅則的某頁」的請求
 def pageQuery(ieType, ccc, page):
     page_payload = 'state=queryAll&queryAllFlag=true&loginOlapId=&loginId=&loginRole=&loginName=&loginCompanyType=&loginRegUnitCode=&loginCaNo=&orderByColumn=&isAscending=true&progID=queryBasicf&filestoreLocation=D%3A%5CFileStore%5CFB&uploadKey=&q_BanNo=&q_CName=&q_EName=&q_Boss=&q_ieType=' + ieType + '&q_ccc=' + ccc + '&q_GoodName=&verifyCode=&currentPageSize=10&currentPage=' + str(page) + '&listContainerActiveRowId='
     return requests.request("POST", page_url, headers=page_headers, data = page_payload)
 
+# 向伺服器送出「查詢某公司基本資料」的請求
 def basicQuery(number):
     basic_payload = "{\n    \"banNo\": \"" + number + "\"\n}"
     return requests.request("POST", basic_url, headers=basic_headers, data = basic_payload)
 
+# 向伺服器送出「查詢某公司近五年實績」的請求
 def gradeQuery(number):
     grade_payload = "{\n    \"banNo\": \"" + number + "\"\n}"
     return requests.request("POST", grade_url, headers=grade_headers, data = grade_payload)
 
-def getCounts(ieType, ccc):
+# 查詢某稅則下有多少頁
+def getPagesCount(ieType, ccc):
     src = pageQuery(ieType, ccc, 1)
     pagesCount = re.search('共(\d+)頁', src.text)[1]
-    companiesCount = re.search('共(\d+)筆', src.text)[1]
-    return int(pagesCount), int(companiesCount)
+    return int(pagesCount)
 
+# 查詢某稅則下有多少筆公司資料
+def getCompaniesCount(ieType, ccc):
+    src = pageQuery(ieType, ccc, 1)
+    companiesCount = re.search('共(\d+)筆', src.text)[1]
+    return int(companiesCount)
+
+# 抓取某頁中的公司列表
 def getTable(ieType, ccc, page):
     response = pageQuery(ieType, ccc, str(page + 1))
     html = BeautifulSoup(response.text, "lxml")
     return html.find("section", attrs={"id":"listContainer"}).find_all("tr")[1:]
 
-def getRow(ieType, ccc, page, index, company):
-    serial = str(page * 10 + index + 1)
-    number = company.find("a").string
-    line = ieType + ',' + ccc + ',' + serial + ',"' + number + '"'
+# 抓取某稅則的公司統編列表
+def getCategory(outfile, ieType, ccc, mode = ""):
+    with open(outfile, 'w') as f:
+        header = '"I/E",ccc,serial,"tax number"'
+        f.write(header + '\n')
+        for page in range(getPagesCount(ieType, ccc)):
+            table = getTable(ieType, ccc, page)
+            for index, company in enumerate(table):
+                serial = str(page * 10 + index + 1)
+                number = company.find("a").string
+                row = ieType + ',' + ccc + ',' + serial + ',"' + number + '"'
+                if mode != "d":
+                    f.write(row + '\n')
+                print(row)
 
+# 抓取某公司的基本資料
+def getCompanyBasic(number):
+    (name, area, address, phone) = ("", "", "", "")
     response = basicQuery(number)
     data = json.loads(response.text)
-    (name, area, address, phone) = ("", "", "", "")
     if data["result"] == "success":
         company = data["retrieveDataList"][0]
         name    = company[1]      if company[1] != None else ""
         area    = company[6][0:3] if company[6] != None else ""
         address = company[6]      if company[6] != None else ""
         phone   = company[8]      if company[8] != None else ""
-    line += ',' + name + ',' + area + ',' + address + ',"' + phone + '"'
+    return '"' + number + '",' + name + ',' + area + ',' + address + ',"' + phone + '"'
 
+# 抓取某公司的近五年實績
+# 注意：不同年份的資料在合併時，要確認同欄位是否同年份
+def getCompanyGrade(number):
+    row = '"' + number + '"'
     response = gradeQuery(number)
     data = json.loads(response.text)
     companys = data["retrieveDataList"]
     if data["result"] == "success":
         for company in companys:
-            line += ',' + company[4] + ',' + company[5]
-
-    return line
+            row += ',' + company[4] + ',' + company[5]
+    return row
 
