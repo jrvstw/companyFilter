@@ -6,7 +6,7 @@ import csv
 # fbfhTools.py: 自建的「出進口廠商管理系統」網頁的工具包
 #   |- getCompanyBasic: 抓取某公司的基本資料
 #   |- getCompanyGrade: 抓取某公司的近五年實績
-#                       注意：不同年份的資料在合併時，要確認同欄位是否同年份
+#                       注意：不同年抓的資料在合併時，要確認同欄位是否同年份
 from fbfhTools import getCompanyBasic
 from fbfhTools import getCompanyGrade
 
@@ -20,9 +20,9 @@ for name in sys.argv:
         infileList.append(name)
 
 # 要匯出的檔案與其參數
-companyBasic = "outfiles" + os.path.sep + "CompanyBasic.csv"
-companyGrade = "outfiles" + os.path.sep + "CompanyGrade.csv"
-log          = "outfiles" + os.path.sep + "Log.csv"
+companyBasic = f"outfiles{os.path.sep}CompanyBasic.csv"
+companyGrade = f"outfiles{os.path.sep}CompanyGrade.csv"
+log          = f"outfiles{os.path.sep}Log.csv"
 columnsOfLog = 6
 mode         = sys.argv[2] if len(sys.argv) > 2 else ""
 
@@ -52,6 +52,22 @@ if os.path.isfile(exclude):
     numberList = numberList.difference(new)
 
 # 4. 匯出
+def myExport(table, method, outfile, mode):
+    with open(outfile, 'w') as f:
+        for row in table:
+            content = method(row)
+            if mode != 'd':
+                f.write(content + '\n')
+            print(content)
+
+def getCompanyLog(number):
+    return f'"{number}"' + ',' * columnsOfLog
+
+myExport(numberList, getCompanyBasic, companyBasic, mode)
+myExport(numberList, getCompanyGrade, companyGrade, mode)
+myExport(numberList, getCompanyLog,   log         , mode)
+
+'''
 with open(companyBasic, 'w') as f:
     for company in numberList:
         row = getCompanyBasic(company)
@@ -68,12 +84,11 @@ with open(companyGrade, 'w') as f:
 
 with open(log, 'w') as f:
     for company in numberList:
-        row = '"' + company + '"' + ',' * columnsOfLog
+        row = f'"{company}"' + ',' * columnsOfLog
         if mode != "d":
             f.write(row + '\n')
         print(row)
 
-'''
 print(numberList)
 print(len(numberList))
 '''

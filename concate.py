@@ -3,10 +3,10 @@ import fnmatch
 import csv
 
 infile = "."
-category = "outfiles/category.csv"
-cBasic   = "outfiles/cBasic.csv"
-cGrade   = "outfiles/cGrade.csv"
-logs     = "outfiles/logs.csv"
+category = f"outfiles{os.path.sep}category.csv"
+cBasic   = f"outfiles{os.path.sep}cBasic.csv"
+cGrade   = f"outfiles{os.path.sep}cGrade.csv"
+logs     = f"outfiles{os.path.sep}logs.csv"
 
 with open(category, "w") as f1, open(cBasic, "w") as f2, open(cGrade, "w") as f3, open(logs, "w") as f4:
     writer1 = csv.writer(f1)

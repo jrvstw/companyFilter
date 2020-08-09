@@ -85,35 +85,36 @@ def getCategory(outfile, ieType, ccc, mode = ""):
         for page in range(getPagesCount(ieType, ccc)):
             table = getTable(ieType, ccc, page)
             for index, company in enumerate(table):
-                serial = str(page * 10 + index + 1)
+                serial = page * 10 + index + 1
                 number = company.find("a").string
-                row = ieType + ',' + ccc + ',' + serial + ',"' + number + '"'
+                row = f'{ieType},{ccc},{serial},"{number}"'
                 if mode != "d":
                     f.write(row + '\n')
                 print(row)
 
 # 抓取某公司的基本資料
 def getCompanyBasic(number):
-    (name, area, address, phone) = ("", "", "", "")
+    name = date = area = address = phone = ""
     response = basicQuery(number)
     data = json.loads(response.text)
     if data["result"] == "success":
         company = data["retrieveDataList"][0]
         name    = company[1]      if company[1] != None else ""
+        date    = company[4]      if company[4] != None else ""
         area    = company[6][0:3] if company[6] != None else ""
         address = company[6]      if company[6] != None else ""
         phone   = company[8]      if company[8] != None else ""
-    return '"' + number + '",' + name + ',' + area + ',' + address + ',"' + phone + '"'
+    return f'"{number}",{name},{area},{address},"{phone}",{date}'
 
 # 抓取某公司的近五年實績
 # 注意：不同年份的資料在合併時，要確認同欄位是否同年份
 def getCompanyGrade(number):
-    row = '"' + number + '"'
+    row = '"{number}"'
     response = gradeQuery(number)
     data = json.loads(response.text)
     companys = data["retrieveDataList"]
     if data["result"] == "success":
         for company in companys:
-            row += ',' + company[4] + ',' + company[5]
+            row += f',{company[4]},{company[5]}'
     return row
 

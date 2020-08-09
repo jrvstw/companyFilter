@@ -37,7 +37,7 @@ def validate(argv):
     mode     = argv[2] if len(argv) > 2 else ""
     if re.search('^[EI][0-9]{4}$', category) == None:
         if mode == "y":
-            exit("Failed: " + category)
+            exit(f"Failed: {category}")
         category = input("Category : ")
         while re.search('^[EI][0-9]{4}$', category) == None:
             print("Invalid input.")
@@ -47,12 +47,12 @@ def validate(argv):
 # 1. 驗證輸入、決定輸出檔名
 (ieType, ccc, mode) = validate(sys.argv)
 companiesCount = getCompaniesCount(ieType, ccc)
-outfile  = "outfiles" + os.path.sep + ieType + ccc + "_" + str(companiesCount) + ".csv"
+outfile = f"outfiles{os.path.sep}{ieType}{ccc}_{companiesCount}.csv"
 
 # 2. 經使用者確認，才可執行，除非為 y 或 d 模式
 if mode not in ["y", "d"]:
-    print('Saving ' + str(companiesCount) + ' items to "' + outfile + '".')
-    if input('Enter "y" to proceed: ') != "y":
+    print(f"Saving {companiesCount} items to '{outfile}'.")
+    if input("Enter 'y' to proceed: ") != "y":
         exit("Abort.")
 
 # 3. 抓取該稅則下所有公司統編
