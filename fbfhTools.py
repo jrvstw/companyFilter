@@ -112,9 +112,47 @@ def getCompanyGrade(number):
     row = '"{number}"'
     response = gradeQuery(number)
     data = json.loads(response.text)
-    companys = data["retrieveDataList"]
+    company = data["retrieveDataList"]
     if data["result"] == "success":
-        for company in companys:
-            row += f',{company[4]},{company[5]}'
+        for entry in company:
+            row += f',{entry[4]},{entry[5]}'
     return row
+
+# 抓取某公司的基本資料
+def getCompanyBasicV2(number):
+    number = str(number)
+    basic = {
+            'taxNumber': number,
+            }
+    response = basicQuery(number)
+    data = json.loads(response.text)
+    if data["result"] == "success":
+        company = data["retrieveDataList"][0]
+        basic['name']       = company[1]      if company[1] != None else ""
+        basic['reg_date']   = company[4]      if company[4] != None else ""
+        basic['city']       = company[6][0:3] if company[6] != None else ""
+        basic['address']    = company[6]      if company[6] != None else ""
+        basic['phone']      = company[8]      if company[8] != None else ""
+
+        if basic['reg_date'] != "":
+            date = basic['reg_date'].split('/')
+            date[0] = str(int(date[0]) + 1911)
+            basic['reg_date'] = '-'.join(date)
+    return basic
+
+# 抓取某公司的近五年實績
+# 注意：不同年份的資料在合併時，要確認同欄位是否同年份
+def getCompanyGradeV2(number):
+    number = str(number)
+    grade = {
+            'taxNumber': number,
+            }
+    response = gradeQuery(number)
+    data = json.loads(response.text)
+    company = data["retrieveDataList"]
+    if data["result"] == "success":
+        for entry in company[:5]:
+            grade['i' + entry[6]] = entry[4]
+            grade['e' + entry[6]] = entry[5]
+    return grade
 

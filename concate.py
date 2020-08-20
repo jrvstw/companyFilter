@@ -1,6 +1,8 @@
+import sys
+import csv
+'''
 import os
 import fnmatch
-import csv
 
 infile = "."
 category = f"outfiles{os.path.sep}category.csv"
@@ -28,4 +30,26 @@ with open(category, "w") as f1, open(cBasic, "w") as f2, open(cGrade, "w") as f3
                     writer4.writerow([row[3]])
                     lines_seen.add(row[3])
                 print(row)
+'''
+
+def concateFiles(outfile, infiles, infilesHasHeader, showProgress):
+    with open(outfile, 'w') as fo:
+        writer = csv.writer(fo)
+        for infile in infiles:
+            with open(infile, newline='') as fi:
+                rows = csv.reader(fi)
+                if infilesHasHeader:
+                    next(rows, None)
+                for row in rows:
+                    writer.writerow(row)
+                    if showProgress:
+                        print(row)
+
+if len(sys.argv) < 3:
+    exit("Usage: python concate.py [outfile] [infiles]+")
+
+outfile = sys.argv[1]
+infiles = sys.argv[2:]
+
+concateFiles(outfile, infiles, True, True)
 

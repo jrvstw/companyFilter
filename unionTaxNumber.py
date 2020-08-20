@@ -10,18 +10,15 @@ import csv
 from fbfhTools import getCompanyBasic
 from fbfhTools import getCompanyGrade
 
-# 排除匯入的檔案
+# 排除匯入的統編清單
 exclude = "outfiles/imported.csv"
+outfile = "outfiles/toImport.csv"
 
-# 要匯入的檔案列表
+# 要匯入的檔案
 infileList = []
-for name in sys.argv:
+for name in sys.argv[1:]:
     if re.search('[IE][0-9]{4}.+csv$', name):
         infileList.append(name)
-
-# 要匯出的檔案與其參數
-toImport    = "outfiles/toImport.csv"
-mode        = sys.argv[2] if len(sys.argv) > 2 else ""
 
 # 抓取某csv檔的某欄位
 def getColumn(infile, column, skipFirstRow):
@@ -35,20 +32,19 @@ def getColumn(infile, column, skipFirstRow):
     return output
 
 
-# 1. 新增空集合
-numberList = set()
 
-# 2. 把每個檔案抓出來的列表和 numberList 取聯集
+# 1. 把每個檔案抓出來的列表取聯集
+numberList = set()
 for infile in infileList:
     new = set(getColumn(infile, 3, True))
     numberList = numberList.union(new)
 
-# 3. 把 numberList 和 exclude 檔的列表取差集
+# 2. 把 numberList 和 exclude 檔的列表取差集
 if os.path.isfile(exclude):
     new = set(getColumn(exclude, 0, False))
     numberList = numberList.difference(new)
 
-# 4. 匯出
+# 3. 匯出
 def myExport(table, method, outfile, mode):
     with open(outfile, 'w') as f:
         for row in table:
@@ -58,36 +54,7 @@ def myExport(table, method, outfile, mode):
             print(content)
 
 def getNumberList(number):
-    return f'"{number}"'
+    return f'{number}'
 
-def getCompanyLog(number):
-    return f'"{number}"' + ',' * columnsOfLog
-
-myExport(numberList, getNumberList, toImport, mode)
-
-'''
-with open(companyBasic, 'w') as f:
-    for company in numberList:
-        row = getCompanyBasic(company)
-        if mode != "d":
-            f.write(row + '\n')
-        print(row)
-
-with open(companyGrade, 'w') as f:
-    for company in numberList:
-        row = getCompanyGrade(company)
-        if mode != "d":
-            f.write(row + '\n')
-        print(row)
-
-with open(log, 'w') as f:
-    for company in numberList:
-        row = f'"{company}"' + ',' * columnsOfLog
-        if mode != "d":
-            f.write(row + '\n')
-        print(row)
-
-print(numberList)
-print(len(numberList))
-'''
+myExport(numberList, getNumberList, outfile, '')
 
