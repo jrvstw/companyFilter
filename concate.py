@@ -46,7 +46,7 @@ def concateFiles(outfile, infiles, infilesHasHeader, showProgress):
                         print(row)
 
 if len(sys.argv) < 3:
-    exit("Usage: python concate.py [outfile] [infiles]+")
+    exit("Usage: python concate.py [outfile] [infiles ...]")
 
 outfile = sys.argv[1]
 infiles = sys.argv[2:]

@@ -3,13 +3,6 @@ import os
 import re
 import csv
 
-# fbfhTools.py: 自建的「出進口廠商管理系統」網頁的工具包
-#   |- getCompanyBasic: 抓取某公司的基本資料
-#   |- getCompanyGrade: 抓取某公司的近五年實績
-#                       注意：不同年抓的資料在合併時，要確認同欄位是否同年份
-from fbfhTools import getCompanyBasic
-from fbfhTools import getCompanyGrade
-
 # 排除匯入的統編清單
 exclude = "outfiles/imported.csv"
 outfile = "outfiles/toImport.csv"

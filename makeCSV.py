@@ -7,8 +7,8 @@ import csv
 #   |- getCompanyBasic: 抓取某公司的基本資料
 #   |- getCompanyGrade: 抓取某公司的近五年實績
 #                       注意：不同年抓的資料在合併時，要確認同欄位是否同年份
-from fbfhTools import getCompanyBasicV2 as getCompanyBasic
-from fbfhTools import getCompanyGradeV2 as getCompanyGrade
+from fbfhTools import getCompanyBasic
+from fbfhTools import getCompanyGrade
 
 # 抓取某csv檔的某欄位
 def getColumnFromCSV(infile, column, skipFirstRow):
@@ -40,8 +40,8 @@ infileLocateIDColumn    = 0
 infileHasHeader         = False
 outfile                 = "outfiles/companyBasic2.csv"
 method                  = getCompanyBasic
-#columns                 = ['taxNumber', 'i109', 'e109', 'i108', 'e108', 'i107', 'e107', 'i106', 'e106', 'i105', 'e105']
-columns                 = ['taxNumber', 'name', 'reg_date', 'address', 'phone']
+#columns                 = ['統編', 'i109', 'e109', 'i108', 'e108', 'i107', 'e107', 'i106', 'e106', 'i105', 'e105']
+columns                 = ['統編', '公司名', '城市', '地址', '電話', '登記日']
 outfileHasHeader        = True
 showProgress            = True
 
