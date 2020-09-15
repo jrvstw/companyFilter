@@ -126,7 +126,7 @@ def getCompanyBasicV2(number):
             }
     response = basicQuery(number)
     data = json.loads(response.text)
-    if data["result"] == "success":
+    if data["result"] == "success": # and len(data["retrieveDataList"]) > 0:
         company = data["retrieveDataList"][0]
         basic['name']       = company[1]      if company[1] != None else ""
         basic['reg_date']   = company[4]      if company[4] != None else ""

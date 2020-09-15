@@ -46,7 +46,15 @@ def validate(argv):
 
 # 1. 驗證輸入、決定輸出檔名
 (ieType, ccc, mode) = validate(sys.argv)
-companiesCount = getCompaniesCount(ieType, ccc)
+print("\n" + ieType + ccc + ":")
+try:
+    companiesCount = getCompaniesCount(ieType, ccc)
+except:
+    with open("outfiles/run4_failed.csv", "a") as f:
+        f.write(ieType + ccc + '\n')
+    exit("failed.")
+
+
 outfile = f"outfiles{os.path.sep}{ieType}{ccc}_{companiesCount}.csv"
 
 # 2. 經使用者確認，才可執行，除非為 y 或 d 模式
