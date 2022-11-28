@@ -20,17 +20,17 @@ from fbfhTools import getCategory
 #
 #   若非直接執行，而是使用命令列，其指令範例如下：
 #
-#       > python fetch.py E8502
+#       > python fetchCategory.py E8502
 #
 #   若格式錯誤，則會提示輸入稅則。其輸入方法可參照前例。
 #   命令列輸入允許額外參數，例如：
 #
-#       > python fetch.py E8502 y
+#       > python fetchCategory.py E8502 y
 #
 #   參數"y"可避開所有輸入提示，以滿足自動化需求。
 #   另一參數"d"為測試用，不實際寫入檔案，只顯示於螢幕：
 #
-#       > python fetch.py E8502 d
+#       > python fetchCategory.py E8502 d
 #
 def validate(argv):
     category = argv[1] if len(argv) > 1 else ""

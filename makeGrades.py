@@ -1,3 +1,4 @@
+import sys
 from csvTools import getColumn as getColumnFromCSV
 from csvTools import makeCSV
 
@@ -6,14 +7,19 @@ from csvTools import makeCSV
 #                       注意：不同年抓的資料在合併時，要確認同欄位是否同年份
 from fbfhTools import getCompanyGradeV2 as getCompanyGrade
 
+if len(sys.argv) < 3:
+    exit("Usage: python concate.py [outfile] [infile]")
 
-infile                  = "outfiles/importedFinal.csv"
+outfile = sys.argv[1]
+infiles = sys.argv[2]
+
+infile                  = sys.argv[1]
 infileLocateIDColumn    = 0
 infileHasHeader         = False
-outfile                 = "data/run4/companyGrade.csv"
+outfile                 = sys.argv[2]
 method                  = getCompanyGrade
-columns                 = ['taxNumber', 'i109', 'e109', 'i108', 'e108', 'i107', 'e107', 'i106', 'e106', 'i105', 'e105']
-includeHeader           = True
+columns                 = ['taxNumber', 'i111', 'e111', 'i110', 'e110', 'i109', 'e109', 'i108', 'e108', 'i107', 'e107']
+includeHeader           = False
 showProgress            = True
 
 print()
@@ -33,6 +39,6 @@ if input("enter 'y' to proceed: ") != 'y':
     exit('Abort.')
 
 rowIDs          = set(getColumnFromCSV(infile, infileLocateIDColumn, infileHasHeader))
-makeCSV(method, outfile, columns, rowIDs, includeHeader, showProgress)
+makeCSV(method, outfile, columns, rowIDs, includeHeader, showProgress, 'a')
 
 
